@@ -1,5 +1,4 @@
-import { Auth, GoogleApis, fitness_v1 } from "googleapis";
-// import { Schema$AggregateResponse } from "googleapis/build/src/apis/fitness/v1";
+import { Auth, fitness_v1 } from "googleapis";
 import { config } from "dotenv";
 import fs from "fs";
 import { GoogleSheetsAdapter } from "./GoogleSheets";
@@ -17,40 +16,59 @@ googleOauth2Client.setCredentials({
 });
 
 const main = async () => {
-  const fitness = new fitness_v1.Fitness({
-    auth: googleOauth2Client,
-  });
-
   const googleSheets = new GoogleSheetsAdapter(googleOauth2Client);
   const googleFit = new GoogleFitAdapter(googleOauth2Client);
 
   const aggregateBy = [
     { dataTypeName: "com.google.step_count.delta" },
-    { dataTypeName: "com.google.calories.expended" },
-    { dataTypeName: "com.google.distance.delta" },
     { dataTypeName: "com.google.heart_rate.bpm" },
-    { dataTypeName: "com.google.weight" },
-    { dataTypeName: "com.google.height" },
-    { dataTypeName: "com.google.body.fat.percentage" },
-    { dataTypeName: "com.google.activity.segment" },
+    // { dataTypeName: "com.google.activity.segment" },
     // { dataTypeName: "com.google.sleep.segment" },
   ];
 
-  const now1 = new Date().getTime();
-  const oneDayAgo1 = new Date(now1 - 86400000).getTime();
-  // const twoDaysAgo = new Date(now - 172800000).getTime();
+  const yesterday = new Date().getTime() - 86400000;
+  const theDayBeforeYesterday = new Date().getTime() - 172800000;
 
-  const data1 = await googleFit.getAggregateData(aggregateBy, oneDayAgo1, now1);
+  const data = await googleFit.getAggregateData(
+    aggregateBy,
+    theDayBeforeYesterday,
+    yesterday
+  );
 
-  console.log({ data1 });
+  const adaptedData = googleFitAggregatedDataResponseAdapater(data);
+
+  console.log({ adaptedData });
   // console.log all data to json file
-  fs.writeFile("data1.json", JSON.stringify(data1, null, 2), (err) => {
-    if (err) {
-      console.log(err);
-    }
+  // fs.writeFile("data1.json", JSON.stringify(data, null, 2), (err) => {
+  //   if (err) {
+  //     console.log(err);
+  //   }
+  // });
+
+  googleSheets.saveSheetValues(adaptedData);
+};
+
+export const googleFitAggregatedDataResponseAdapater = (
+  data: fitness_v1.Schema$AggregateResponse
+) => {
+  const result: any[][] = [];
+
+  data.bucket?.forEach((bucket) => {
+    const bucketResult: any[] = [];
+    const startDate = new Date(parseInt(bucket.startTimeMillis || ""));
+    bucketResult.push(`${startDate.toLocaleDateString("he-IL")}`);
+    bucket.dataset?.forEach((dataset) => {
+      dataset.point?.forEach((point) => {
+        point.value?.forEach((value) => {
+          bucketResult.push(value.fpVal || value.intVal);
+        });
+      });
+    });
+
+    result.push(bucketResult);
   });
 
-  return;
+  return result;
 };
 
 main();
