@@ -23,11 +23,12 @@ const main = async () => {
     { dataTypeName: "com.google.step_count.delta" },
     { dataTypeName: "com.google.heart_rate.bpm" },
     // { dataTypeName: "com.google.activity.segment" },
-    // { dataTypeName: "com.google.sleep.segment" },
+    { dataTypeName: "com.google.sleep.segment" },
   ];
 
   const yesterday = new Date().getTime() - 86400000;
   const theDayBeforeYesterday = new Date().getTime() - 172800000;
+  // const aWeekAgo = new Date().getTime() - 604800000;
 
   const data = await googleFit.getAggregateData(
     aggregateBy,
@@ -39,11 +40,11 @@ const main = async () => {
 
   console.log({ adaptedData });
   // console.log all data to json file
-  // fs.writeFile("data1.json", JSON.stringify(data, null, 2), (err) => {
-  //   if (err) {
-  //     console.log(err);
-  //   }
-  // });
+  fs.writeFile("data1.json", JSON.stringify(data, null, 2), (err) => {
+    if (err) {
+      console.log(err);
+    }
+  });
 
   googleSheets.saveSheetValues(adaptedData);
 };
