@@ -1,4 +1,6 @@
+import { format } from "date-fns";
 import { GoogleFitDay } from "../Entities/GoogleFitDay";
+import { formatInTimeZone } from "date-fns-tz";
 
 export const SHEET_HEADERS = [
   "Date",
@@ -16,7 +18,11 @@ export const SHEET_HEADERS = [
 
 export function googleFitDayToSheetRow(googleFitDay: GoogleFitDay) {
   return [
-    googleFitDay.from,
+    formatInTimeZone(
+      googleFitDay.from,
+      "Asia/Jerusalem",
+      "yyyy-MM-dd HH:mm:ss"
+    ),
     googleFitDay.stepCount,
     googleFitDay.averageHeartRate,
     googleFitDay.maxHeartRate,
