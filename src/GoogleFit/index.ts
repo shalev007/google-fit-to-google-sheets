@@ -1,7 +1,8 @@
 import { hoursToMilliseconds } from "date-fns";
 import { Auth, fitness_v1, google } from "googleapis";
+import { DataTypeName } from "./enums";
 
-export class GoogleFitAdapter {
+export class GoogleFitClient {
   private readonly client: fitness_v1.Fitness;
 
   constructor(authClient: Auth.OAuth2Client) {
@@ -20,11 +21,10 @@ export class GoogleFitAdapter {
       userId: "me",
       requestBody: {
         aggregateBy: [
-          { dataTypeName: "com.google.step_count.delta" },
-          { dataTypeName: "com.google.heart_rate.bpm" },
-          { dataTypeName: "com.google.distance.delta" },
-          { dataTypeName: "com.google.calories.expended" },
-          { dataTypeName: "com.google.sleep.segment" },
+          { dataTypeName: DataTypeName.StepCount },
+          { dataTypeName: DataTypeName.HeartRate },
+          { dataTypeName: DataTypeName.Distance },
+          { dataTypeName: DataTypeName.Calories },
         ],
         bucketByTime: { durationMillis: hoursToMilliseconds(24) },
         startTimeMillis,
@@ -44,7 +44,7 @@ export class GoogleFitAdapter {
       // @ts-ignore
       userId: "me",
       requestBody: {
-        aggregateBy: [{ dataTypeName: "com.google.sleep.segment" }],
+        aggregateBy: [{ dataTypeName: DataTypeName.SleepSegment }],
         startTimeMillis,
         endTimeMillis,
       },

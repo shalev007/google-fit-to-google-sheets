@@ -1,8 +1,8 @@
 import { Auth } from "googleapis";
 import { config } from "dotenv";
 import fs from "fs";
-import { GoogleSheetsAdapter } from "./GoogleSheets";
-import { GoogleFitAdapter } from "./GoogleFit";
+import { GoogleSheetsClient } from "./GoogleSheets";
+import { GoogleFitClient } from "./GoogleFit";
 import { CronJob } from "cron";
 import { GoogleFitDay } from "./Entities/GoogleFitDay";
 import { startOfYesterday, subDays } from "date-fns";
@@ -20,8 +20,8 @@ googleOauth2Client.setCredentials({
 });
 
 const main = async () => {
-  const googleSheets = new GoogleSheetsAdapter(googleOauth2Client);
-  const googleFit = new GoogleFitAdapter(googleOauth2Client);
+  const googleSheets = new GoogleSheetsClient(googleOauth2Client);
+  const googleFit = new GoogleFitClient(googleOauth2Client);
 
   const yesterday = startOfYesterday().getTime();
   const theDayBeforeYesterday = subDays(yesterday, 1).getTime();

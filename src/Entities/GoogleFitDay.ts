@@ -1,6 +1,6 @@
 import { fitness_v1 } from "googleapis";
 import { millisecondsToHours, nanosecondsToMilliseconds } from "../util";
-import { SleepStage } from "../GoogleFit/enums";
+import { DataSourceId, SleepStage } from "../GoogleFit/enums";
 
 export class GoogleFitDay {
   from!: Date;
@@ -40,7 +40,7 @@ export class GoogleFitDay {
     aggregateResponse.bucket?.forEach((bucket) => {
       bucket.dataset?.forEach((dataset) => {
         switch (dataset.dataSourceId) {
-          case "derived:com.google.sleep.segment:com.google.android.gms:merged":
+          case DataSourceId.SleepSegment:
             dataset.point?.forEach((point) => {
               point.value?.forEach((value) => {
                 const startTime = nanosecondsToMilliseconds(
@@ -95,18 +95,18 @@ export class GoogleFitDay {
       fitDay.setToDateMillis(parseInt(bucket.endTimeMillis || ""));
       bucket.dataset?.forEach((dataset) => {
         switch (dataset.dataSourceId) {
-          case "derived:com.google.step_count.delta:com.google.android.gms:aggregated":
+          case DataSourceId.StepCount:
             fitDay.stepCount = dataset.point?.[0].value?.[0].intVal || 0;
             break;
-          case "derived:com.google.heart_rate.summary:com.google.android.gms:aggregated":
+          case DataSourceId.HeartRate:
             fitDay.averageHeartRate = dataset.point?.[0].value?.[0].fpVal || 0;
             fitDay.maxHeartRate = dataset.point?.[0].value?.[1].fpVal || 0;
             fitDay.minHeartRate = dataset.point?.[0].value?.[2].fpVal || 0;
             break;
-          case "derived:com.google.distance.delta:com.google.android.gms:aggregated":
+          case DataSourceId.Distance:
             fitDay.distance = dataset.point?.[0].value?.[0].fpVal || 0;
             break;
-          case "derived:com.google.calories.expended:com.google.android.gms:aggregated":
+          case DataSourceId.Calories:
             fitDay.calories = dataset.point?.[0].value?.[0].fpVal || 0;
             break;
           //   case "derived:com.google.sleep.segment:com.google.android.gms:sleep_from_activity_segment":

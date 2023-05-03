@@ -4,7 +4,7 @@ import fs from "fs";
 const SHEET_NAME = "Sheet1";
 const SPREADSHEET_STATE_FILE = "spreadsheet.json";
 
-export class GoogleSheetsAdapter {
+export class GoogleSheetsClient {
   private readonly client: sheets_v4.Sheets;
   private _spreadsheetId: string = "";
 

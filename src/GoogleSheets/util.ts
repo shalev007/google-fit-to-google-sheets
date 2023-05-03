@@ -1,4 +1,3 @@
-import { format } from "date-fns";
 import { GoogleFitDay } from "../Entities/GoogleFitDay";
 import { formatInTimeZone } from "date-fns-tz";
 
