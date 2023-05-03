@@ -43,13 +43,6 @@ const main = async () => {
     googleSheetsValues.push(googleFitDayToSheetRow(fitDay));
   }
 
-  // console.log all data to json file
-  // fs.writeFile("data1.json", JSON.stringify(data, null, 2), (err) => {
-  //   if (err) {
-  //     console.log(err);
-  //   }
-  // });
-
   googleSheets.saveSheetValues(googleSheetsValues);
 };
 

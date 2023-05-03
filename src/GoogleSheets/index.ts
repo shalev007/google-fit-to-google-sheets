@@ -1,12 +1,13 @@
 import { Auth, google, sheets_v4 } from "googleapis";
 import fs from "fs";
+import { SHEET_HEADERS } from "./util";
 
-const SHEET_NAME = "Sheet1";
+const SHEET_NAME = "GoogleFitToGoogleSheets";
 const SPREADSHEET_STATE_FILE = "spreadsheet.json";
 
 export class GoogleSheetsClient {
   private readonly client: sheets_v4.Sheets;
-  private _spreadsheetId: string = "";
+  private _spreadsheetId: string = process.env.GOOGLE_SHEET_ID ?? "";
 
   constructor(authClient: Auth.OAuth2Client) {
     this.client = google.sheets({
@@ -62,5 +63,6 @@ export class GoogleSheetsClient {
     });
 
     this._spreadsheetId = createResponse.data.spreadsheetId ?? "";
+    this.saveSheetValues([SHEET_HEADERS]);
   }
 }
