@@ -1,3 +1,4 @@
+import { hoursToMilliseconds } from "date-fns";
 import { Auth, fitness_v1, google } from "googleapis";
 
 export class GoogleFitAdapter {
@@ -11,7 +12,6 @@ export class GoogleFitAdapter {
   }
 
   public async getAggregateData(
-    aggregateBy: fitness_v1.Schema$AggregateBy[],
     startTimeMillis: number,
     endTimeMillis: number
   ): Promise<fitness_v1.Schema$AggregateResponse> {
@@ -19,8 +19,14 @@ export class GoogleFitAdapter {
       // @ts-ignore
       userId: "me",
       requestBody: {
-        aggregateBy,
-        bucketByTime: { durationMillis: 86400000 },
+        aggregateBy: [
+          { dataTypeName: "com.google.step_count.delta" },
+          { dataTypeName: "com.google.heart_rate.bpm" },
+          { dataTypeName: "com.google.distance.delta" },
+          { dataTypeName: "com.google.calories.expended" },
+          { dataTypeName: "com.google.sleep.segment" },
+        ],
+        bucketByTime: { durationMillis: hoursToMilliseconds(24) },
         startTimeMillis,
         endTimeMillis,
       },
@@ -30,31 +36,21 @@ export class GoogleFitAdapter {
     return response.data;
   }
 
-  public async getAggregateDataAsArray(
-    aggregateBy: fitness_v1.Schema$AggregateBy[],
+  public async getSleepData(
     startTimeMillis: number,
     endTimeMillis: number
-  ): Promise<any[][]> {
-    const data = await this.getAggregateData(
-      aggregateBy,
-      startTimeMillis,
-      endTimeMillis
-    );
-    const result: any[][] = [];
-
-    data.bucket?.forEach((bucket) => {
-      const bucketResult: any[] = [];
-      bucket.dataset?.forEach((dataset) => {
-        dataset.point?.forEach((point) => {
-          point.value?.forEach((value) => {
-            bucketResult.push(value.fpVal);
-          });
-        });
-      });
-
-      result.push(bucketResult);
+  ): Promise<fitness_v1.Schema$AggregateResponse> {
+    const response = await this.client.users.dataset.aggregate({
+      // @ts-ignore
+      userId: "me",
+      requestBody: {
+        aggregateBy: [{ dataTypeName: "com.google.sleep.segment" }],
+        startTimeMillis,
+        endTimeMillis,
+      },
     });
 
-    return result;
+    // @ts-ignore
+    return response.data;
   }
 }
