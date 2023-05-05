@@ -19,7 +19,7 @@ export class GoogleSheetsClient {
   public async saveSheetValues(data: any[][]): Promise<void> {
     const spreadsheetId = await this.getSpreadsheetId();
     const range = "A1";
-    const response = await this.client.spreadsheets.values.append({
+    await this.client.spreadsheets.values.append({
       spreadsheetId,
       range: range,
       valueInputOption: "USER_ENTERED",
@@ -27,8 +27,6 @@ export class GoogleSheetsClient {
         values: data,
       },
     });
-
-    console.log({ response });
   }
 
   public async getSpreadsheetId(): Promise<string> {
