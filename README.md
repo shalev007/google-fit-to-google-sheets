@@ -26,7 +26,7 @@ This project aims to transfer data from Google Fit to Google Sheets automaticall
 4. Download the credentials file and save it in the project directory as `.env`.
 5. Follow the on-screen instructions to grant permission to the application.
 6. Open the `.env` file and enter the ID of the Google Sheet you want to write to.
-7. Save the `config.json` file.
+7. Save the `.env` file.
 
 ## Usage
 
