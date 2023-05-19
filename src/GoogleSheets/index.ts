@@ -16,6 +16,23 @@ export class GoogleSheetsClient {
     });
   }
 
+  public async getLastRowDate(): Promise<Date | null> {
+    const spreadsheetId = await this.getSpreadsheetId();
+    const range = "A2:A";
+    const response = await this.client.spreadsheets.values.get({
+      spreadsheetId,
+      range,
+    });
+
+    const values = response.data.values ?? [];
+    if (values.length === 0) {
+      return null;
+    }
+
+    const lastRow = values[values.length - 1];
+    return new Date(lastRow[0]);
+  }
+
   public async saveSheetValues(data: any[][]): Promise<void> {
     const spreadsheetId = await this.getSpreadsheetId();
     const range = "A1";
