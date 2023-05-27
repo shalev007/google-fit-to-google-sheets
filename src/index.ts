@@ -44,7 +44,9 @@ const main = async () => {
     googleSheetsValues.push(googleFitDayToSheetRow(fitDay));
   }
 
-  googleSheets.saveSheetValues(googleSheetsValues);
+  googleSheets.saveSheetValues(googleSheetsValues).then(() => {
+    console.log("Saved to Google Sheets!");
+  });
 };
 
 main();
