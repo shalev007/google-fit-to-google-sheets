@@ -3,7 +3,7 @@ import { config } from "dotenv";
 import { GoogleSheetsClient } from "./GoogleSheets";
 import { GoogleFitClient } from "./GoogleFit";
 import { GoogleFitDay } from "./Entities/GoogleFitDay";
-import { min, startOfYesterday, subDays } from "date-fns";
+import { addDays, isBefore, min, startOfYesterday, subDays } from "date-fns";
 import { googleFitDayToSheetRow } from "./GoogleSheets/util";
 
 config();
@@ -21,10 +21,15 @@ const main = async () => {
   const googleSheets = new GoogleSheetsClient(googleOauth2Client);
   const googleFit = new GoogleFitClient(googleOauth2Client);
 
-  const lastRowDate = await googleSheets.getLastRowDate();
   const yesterday = startOfYesterday().getTime();
   const theDayBeforeYesterday = subDays(yesterday, 1);
 
+  let lastRowDate = await googleSheets.getLastRowDate();
+  if (lastRowDate && isBefore(lastRowDate, theDayBeforeYesterday)) {
+    lastRowDate = addDays(lastRowDate, 1);
+  }
+
+  // If there is no last row date, we start from the day before yesterday
   const startDate: Date = min([
     lastRowDate ?? new Date(),
     theDayBeforeYesterday,
