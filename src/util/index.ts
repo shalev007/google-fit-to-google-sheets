@@ -1,3 +1,5 @@
+import { formatInTimeZone } from "date-fns-tz";
+
 export function getCurrentDateTime(date: Date) {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
@@ -16,4 +18,8 @@ export function nanosecondsToMilliseconds(nanoseconds: number) {
 
 export function millisecondsToHours(milliseconds: number) {
   return milliseconds / 1000 / 60 / 60;
+}
+
+export function customDateFormat(date: Date) {
+  return formatInTimeZone(date, "Asia/Jerusalem", "yyyy-MM-dd HH:mm:ss");
 }
