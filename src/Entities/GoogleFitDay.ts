@@ -1,10 +1,13 @@
 import { fitness_v1 } from "googleapis";
 import { millisecondsToHours, nanosecondsToMilliseconds } from "../util";
 import { DataSourceId, SleepStage } from "../GoogleFit/enums";
+import { formatInTimeZone } from "date-fns-tz";
 
 export class GoogleFitDay {
   from!: Date;
   to!: Date;
+  wentToSleepAt?: Date;
+  wokeUpAt?: Date;
   stepCount: number = 0;
   averageHeartRate: number = 0;
   maxHeartRate: number = 0;
@@ -79,6 +82,20 @@ export class GoogleFitDay {
       });
     });
 
+    const dataPoint =
+      aggregateResponse.bucket?.[0].dataset?.find(
+        (ds) => ds.dataSourceId === DataSourceId.SleepSegment
+      )?.point ?? [];
+
+    const wentToSleepAt = dataPoint?.[0].startTimeNanos;
+    const wokeUpAt = dataPoint?.[dataPoint.length - 1]?.endTimeNanos;
+
+    this.wentToSleepAt = wentToSleepAt
+      ? new Date(nanosecondsToMilliseconds(parseInt(wentToSleepAt)))
+      : undefined;
+    this.wokeUpAt = wokeUpAt
+      ? new Date(nanosecondsToMilliseconds(parseInt(wokeUpAt)))
+      : undefined;
     this.sleepHours = millisecondsToHours(totalSleepTime);
     this.sleepAwakeHours = millisecondsToHours(totalAwakeTime);
     this.sleepDeepHours = millisecondsToHours(totalDeepSleepTime);
@@ -96,40 +113,19 @@ export class GoogleFitDay {
       bucket.dataset?.forEach((dataset) => {
         switch (dataset.dataSourceId) {
           case DataSourceId.StepCount:
-            fitDay.stepCount = dataset.point?.[0].value?.[0].intVal || 0;
+            fitDay.stepCount = dataset.point?.[0]?.value?.[0].intVal || 0;
             break;
           case DataSourceId.HeartRate:
-            fitDay.averageHeartRate = dataset.point?.[0].value?.[0].fpVal || 0;
-            fitDay.maxHeartRate = dataset.point?.[0].value?.[1].fpVal || 0;
-            fitDay.minHeartRate = dataset.point?.[0].value?.[2].fpVal || 0;
+            fitDay.averageHeartRate = dataset.point?.[0]?.value?.[0].fpVal || 0;
+            fitDay.maxHeartRate = dataset.point?.[0]?.value?.[1].fpVal || 0;
+            fitDay.minHeartRate = dataset.point?.[0]?.value?.[2].fpVal || 0;
             break;
           case DataSourceId.Distance:
-            fitDay.distance = dataset.point?.[0].value?.[0].fpVal || 0;
+            fitDay.distance = dataset.point?.[0]?.value?.[0].fpVal || 0;
             break;
           case DataSourceId.Calories:
-            fitDay.calories = dataset.point?.[0].value?.[0].fpVal || 0;
+            fitDay.calories = dataset.point?.[0]?.value?.[0].fpVal || 0;
             break;
-          //   case "derived:com.google.sleep.segment:com.google.android.gms:sleep_from_activity_segment":
-          //     const sleepSegmentStartTimes: number[] = [];
-          //     const sleepSegmentEndTimes: number[] = [];
-          //     dataset.point?.forEach((point) => {
-          //       point.value?.forEach((value) => {
-          //         sleepSegmentStartTimes.push(
-          //           parseInt(point.startTimeNanos || "") / 1000000
-          //         );
-          //         sleepSegmentEndTimes.push(
-          //           parseInt(point.endTimeNanos || "") / 1000000
-          //         );
-          //       });
-          //     });
-          //     const sleepStart = new Date(sleepSegmentStartTimes[0]);
-          //     const sleepEnd = new Date(
-          //       sleepSegmentEndTimes[sleepSegmentEndTimes.length - 1]
-          //     );
-          //     const sleepHours =
-          //       (sleepEnd.getTime() - sleepStart.getTime()) / 1000 / 60 / 60;
-          //     bucketResult.push(sleepHours);
-          //     break;
         }
       });
       result.push(fitDay);
