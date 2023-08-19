@@ -1,5 +1,5 @@
-import { GoogleFitDay } from "../Entities/GoogleFitDay";
-import { customDateFormat } from "../util";
+import { GoogleFitDay, UNKNOWN_DATE } from "../Entities/GoogleFitDay";
+import { formatDateWithTimezome } from "../util";
 
 export const SHEET_HEADERS = [
   "Date",
@@ -17,7 +17,7 @@ export const SHEET_HEADERS = [
 
 export function googleFitDayToSheetRow(googleFitDay: GoogleFitDay) {
   return [
-    customDateFormat(googleFitDay.from),
+    formatDateWithTimezome(googleFitDay.from),
     googleFitDay.stepCount,
     googleFitDay.averageHeartRate,
     googleFitDay.maxHeartRate,
@@ -28,7 +28,11 @@ export function googleFitDayToSheetRow(googleFitDay: GoogleFitDay) {
     googleFitDay.sleepAwakeHours,
     googleFitDay.sleepDeepHours,
     googleFitDay.sleepRemHours,
-    customDateFormat(googleFitDay.wentToSleepAt),
-    customDateFormat(googleFitDay.wokeUpAt),
+    googleFitDay.wentToSleepAt !== UNKNOWN_DATE
+      ? formatDateWithTimezome(googleFitDay.wentToSleepAt, "HH:mm:ss")
+      : UNKNOWN_DATE,
+    googleFitDay.wokeUpAt !== UNKNOWN_DATE
+      ? formatDateWithTimezome(googleFitDay.wokeUpAt, "HH:mm:ss")
+      : UNKNOWN_DATE,
   ];
 }

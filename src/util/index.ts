@@ -20,6 +20,9 @@ export function millisecondsToHours(milliseconds: number) {
   return milliseconds / 1000 / 60 / 60;
 }
 
-export function customDateFormat(date: Date) {
-  return formatInTimeZone(date, "Asia/Jerusalem", "yyyy-MM-dd HH:mm:ss");
+export function formatDateWithTimezome(
+  date: Date,
+  format: string = "yyyy-MM-dd HH:mm:ss"
+) {
+  return formatInTimeZone(date, "Asia/Jerusalem", format);
 }

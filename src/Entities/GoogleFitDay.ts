@@ -1,17 +1,13 @@
 import { fitness_v1 } from "googleapis";
-import {
-  customDateFormat,
-  millisecondsToHours,
-  nanosecondsToMilliseconds,
-} from "../util";
+import { millisecondsToHours, nanosecondsToMilliseconds } from "../util";
 import { DataSourceId, SleepStage } from "../GoogleFit/enums";
-import { formatInTimeZone } from "date-fns-tz";
 
+export const UNKNOWN_DATE = "UNKNOWN_DATE";
 export class GoogleFitDay {
   from!: Date;
   to!: Date;
-  wentToSleepAt!: Date;
-  wokeUpAt!: Date;
+  wentToSleepAt: Date | typeof UNKNOWN_DATE = UNKNOWN_DATE;
+  wokeUpAt: Date | typeof UNKNOWN_DATE = UNKNOWN_DATE;
   stepCount: number = 0;
   averageHeartRate: number = 0;
   maxHeartRate: number = 0;
@@ -91,13 +87,17 @@ export class GoogleFitDay {
         (ds) => ds.dataSourceId === DataSourceId.SleepSegment
       )?.point ?? [];
 
-    const wentToSleepAt = parseInt(dataPoint?.[0].startTimeNanos ?? "");
-    const wokeUpAt = parseInt(
-      dataPoint?.[dataPoint.length - 1]?.endTimeNanos ?? ""
-    );
+    // TODO: need to validate sleep hours
+    if (dataPoint.length) {
+      const wentToSleepAt = parseInt(dataPoint?.[0].startTimeNanos ?? "");
+      const wokeUpAt = parseInt(
+        dataPoint?.[dataPoint.length - 1]?.endTimeNanos ?? ""
+      );
 
-    this.wentToSleepAt = new Date(nanosecondsToMilliseconds(wentToSleepAt));
-    this.wokeUpAt = new Date(nanosecondsToMilliseconds(wokeUpAt));
+      this.wentToSleepAt = new Date(nanosecondsToMilliseconds(wentToSleepAt));
+      this.wokeUpAt = new Date(nanosecondsToMilliseconds(wokeUpAt));
+    }
+
     this.sleepHours = millisecondsToHours(totalSleepTime);
     this.sleepAwakeHours = millisecondsToHours(totalAwakeTime);
     this.sleepDeepHours = millisecondsToHours(totalDeepSleepTime);
